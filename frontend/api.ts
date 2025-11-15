@@ -1,15 +1,29 @@
 const API_BASE_URL = 'http://localhost:8000/api'; //backend adrs
 
-
+// Helper function to get CSRF token from cookies
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+  return null; 
+}
 
 // helper func
 async function apiCall(endpoint: string, options: RequestInit = {}) {
+  const csrfToken = getCookie('csrftoken');
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string>),
+  };
+  
+  if (csrfToken && (options.method === 'POST' || options.method === 'PUT' || options.method === 'DELETE' || options.method === 'PATCH')) {
+    headers['X-CSRFToken'] = csrfToken;
+  }
+
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+    headers,
     credentials: 'include', 
   }); //ignore
   
@@ -60,10 +74,10 @@ export const listingsAPI = {
     return apiCall(`/listings/${id}/`);
   },
 
-  create: async (title: string, description: string, price: number, category?: string) => {
+  create: async (title: string, description: string, price: number, category?: string, image?: string) => {
     return apiCall('/listings/', {
       method: 'POST',
-      body: JSON.stringify({ title, description, price, category }),
+      body: JSON.stringify({ title, description, price, category, image }),
     });
   },
 

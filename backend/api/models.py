@@ -18,6 +18,7 @@ class Listing(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.CharField(max_length=100, blank=True)
+    image = models.TextField(blank=True, null=True)  # Store base64 image data
     created_at = models.DateTimeField(auto_now_add=True)
     sold = models.BooleanField(default=False)
 

@@ -59,16 +59,13 @@ class CurrentUserView(APIView):
 # Listing views
 class ListingListCreate(generics.ListCreateAPIView):
     serializer_class = ListingSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]  # Require auth to create
 
     def get_queryset(self): #all listings show
-        return Listing.objects.all()
+        return Listing.objects.filter(author__isnull=False)  # Only show listings with authors
 
     def perform_create(self, serializer):
-        if self.request.user.is_authenticated: # only auth users can create
-            serializer.save(author=self.request.user)
-        else:
-            serializer.save(author=None)
+        serializer.save(author=self.request.user)
 
 class ListingDetailView(generics.RetrieveAPIView):
     serializer_class = ListingSerializer

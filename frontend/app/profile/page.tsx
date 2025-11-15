@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "../types";
+import { authAPI, listingsAPI } from "../../api";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -12,21 +13,37 @@ export default function ProfilePage() {
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [listings, setListings] = useState<any[]>([]);
 
   useEffect(() => {
-    const currentUser = localStorage.getItem("currentUser");
-    if (currentUser) {
-      const profiles = JSON.parse(localStorage.getItem("profiles") || "{}");
-      const userProfile = profiles[currentUser];
-      if (userProfile) {
+    const loadProfile = async () => {
+      try {
+        const user = await authAPI.getCurrentUser();
+        const userProfile: User = {
+          id: user.id || '',
+          email: user.username,
+          firstName: user.first_name,
+          lastName: user.last_name,
+          phone: user.phone || '',
+          address: user.address || '',
+          livesOnCampus: false,
+          createdAt: ''
+        };
         setProfile(userProfile);
-        setFirstName(userProfile.firstName || "");
-        setLastName(userProfile.lastName || "");
-        setPhone(userProfile.phone || "");
-        setAddress(userProfile.address || "");
+        setFirstName(user.first_name || "");
+        setLastName(user.last_name || "");
+        setPhone(user.phone || "");
+        setAddress(user.address || "");
+
+        const allListings = await listingsAPI.getAll();
+        const userListings = allListings.filter((l: any) => l.author.username === user.username);
+        setListings(userListings);
+      } catch (err) {
+        router.push('/login');
       }
-    }
-  }, []);
+    };
+    loadProfile();
+  }, [router]);
 
   const handleSave = () => {
     if (!profile) return;
@@ -46,13 +63,14 @@ export default function ProfilePage() {
     setIsEditing(false);
   };
 
-  const handleLogout = () => {
-    // TODO: Connect to backend API
-    // await authAPI.logout();
-    // localStorage.removeItem("currentUser");
-    // router.push("/login");
-    
-    console.log("Logout button clicked - ready for backend integration");
+  const handleLogout = async () => {
+    try {
+      await authAPI.logout();
+      localStorage.removeItem("currentUser");
+      router.push("/login");
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
   };
 
   if (!profile) {
@@ -209,6 +227,38 @@ export default function ProfilePage() {
               Logout
             </button>
           </div>
+        )}
+      </div>
+
+      <div style={{ marginTop: "32px" }}>
+        <h2 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "16px" }}>
+          My Listings
+        </h2>
+        {listings.length === 0 ? (
+          <p style={{ color: "#666" }}>You haven't created any listings yet.</p>
+        ) : (
+          listings.map((listing) => (
+            <div
+              key={listing.id}
+              style={{
+                border: "1px solid #ddd",
+                borderRadius: "8px",
+                padding: "16px",
+                marginBottom: "12px",
+                backgroundColor: "white",
+              }}
+            >
+              <h3 style={{ margin: "0 0 8px 0", fontSize: "18px" }}>
+                {listing.title}
+              </h3>
+              <p style={{ margin: "0 0 8px 0", color: "#666" }}>
+                {listing.description}
+              </p>
+              <p style={{ margin: 0, fontWeight: "bold" }}>
+                ${listing.price}
+              </p>
+            </div>
+          ))
         )}
       </div>
     </div>

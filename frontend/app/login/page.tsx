@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { authAPI } from "../../api";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -18,13 +20,15 @@ export default function LoginPage() {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-
-    if (users[email] && users[email] === password) {
+    setLoading(true);
+    try {
+      await authAPI.login(email, password);
       localStorage.setItem("currentUser", email);
-      router.push("/");
-    } else {
-      setError("Invalid email or password");
+      router.push("/listings");
+    } catch (err: any) {
+      setError(err.message || "Invalid email or password");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -118,13 +122,16 @@ export default function LoginPage() {
           <button
             type="submit"
             className="btn-primary"
+            disabled={loading}
             style={{
               width: "100%",
               padding: "12px",
               fontSize: "16px",
+              opacity: loading ? 0.6 : 1,
+              cursor: loading ? "not-allowed" : "pointer",
             }}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
         <p

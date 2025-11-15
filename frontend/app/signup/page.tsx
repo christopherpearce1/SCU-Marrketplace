@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "../types";
+import { authAPI } from "../../api";
 
 export default function SignupPage() {
   const [firstName, setFirstName] = useState("");
@@ -16,7 +17,7 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -44,32 +45,20 @@ export default function SignupPage() {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-    if (users[email]) {
-      setError("Email already exists");
-      return;
+    try {
+      await authAPI.register(
+        email,
+        password,
+        firstName,
+        lastName,
+        phone,
+        livesOnCampus ? "On Campus" : address
+      );
+      localStorage.setItem("currentUser", email);
+      router.push("/listings");
+    } catch (err: any) {
+      setError(err.message || "Registration failed");
     }
-
-    users[email] = password;
-    localStorage.setItem("users", JSON.stringify(users));
-
-    const user: User = {
-      id: Date.now().toString(),
-      email,
-      firstName,
-      lastName,
-      phone,
-      address: livesOnCampus ? undefined : address,
-      livesOnCampus,
-      createdAt: new Date().toISOString(),
-    };
-
-    const profiles = JSON.parse(localStorage.getItem("profiles") || "{}");
-    profiles[email] = user;
-    localStorage.setItem("profiles", JSON.stringify(profiles));
-
-    localStorage.setItem("currentUser", email);
-    router.push("/");
   };
 
   return (

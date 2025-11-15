@@ -1,70 +1,104 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { listingsAPI, authAPI } from '../../api'
 
 interface Listing {
-  id: string
+  id: number
   title: string
   description: string
   price: number
-  category: string
-  seller: string
-  createdAt: string
+  category?: string
+  author: { username: string }
 }
 
 export default function ListingsPage() {
+  const router = useRouter()
   const [listings, setListings] = useState<Listing[]>([])
   const [showForm, setShowForm] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
   const [category, setCategory] = useState('Textbooks')
+  const [image, setImage] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [currentUser, setCurrentUser] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const user = localStorage.getItem('currentUser')
-    setCurrentUser(user)
-    loadListings(user)
-  }, [])
+    const checkAuth = async () => {
+      try {
+        const user = await authAPI.getCurrentUser()
+        if (user && user.username) {
+          setCurrentUser(user.username)
+          await loadListings(user.username)
+        } else {
+          router.push('/login')
+        }
+      } catch (err) {
+        router.push('/login')
+      }
+    }
+    checkAuth()
+  }, [router])
 
-  const loadListings = (user: string | null) => {
-    if (!user) return
-    const allListings = JSON.parse(localStorage.getItem('listings') || '[]')
-    const userListings = allListings.filter((l: Listing) => l.seller === user)
-    setListings(userListings)
+  const loadListings = async (username: string | null) => {
+    if (!username) {
+      setLoading(false)
+      return
+    }
+    try {
+      const allListings = await listingsAPI.getAll()
+      const userListings = allListings.filter((l: Listing) => l.author?.username === username)
+      setListings(userListings)
+    } catch (err) {
+      console.error('Failed to load listings:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setImage(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    const newListing: Listing = {
-      id: Date.now().toString(),
-      title,
-      description,
-      price: parseFloat(price),
-      category,
-      seller: currentUser!,
-      createdAt: new Date().toISOString()
+    try {
+      await listingsAPI.create(title, description, parseFloat(price), category, imagePreview || undefined)
+      setTitle('')
+      setDescription('')
+      setPrice('')
+      setCategory('Textbooks')
+      setImage(null)
+      setImagePreview(null)
+      setShowForm(false)
+      if (currentUser) await loadListings(currentUser)
+    } catch (err: any) {
+      alert(err.message || 'Failed to create listing')
     }
-
-    const allListings = JSON.parse(localStorage.getItem('listings') || '[]')
-    allListings.push(newListing)
-    localStorage.setItem('listings', JSON.stringify(allListings))
-    
-    setListings([...listings, newListing])
-    setTitle('')
-    setDescription('')
-    setPrice('')
-    setCategory('Textbooks')
-    setShowForm(false)
   }
 
-  const handleDelete = (id: string) => {
-    const allListings = JSON.parse(localStorage.getItem('listings') || '[]')
-    const updated = allListings.filter((l: Listing) => l.id !== id)
-    localStorage.setItem('listings', JSON.stringify(updated))
-    setListings(listings.filter(l => l.id !== id))
+  const handleDelete = async (id: number) => {
+    try {
+      await listingsAPI.delete(id)
+      setListings(listings.filter(l => l.id !== id))
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete listing')
+    }
   }
+
+  if (loading) return <div>Loading...</div>
 
   return (
     <div>
@@ -122,6 +156,20 @@ export default function ListingsPage() {
                 <option>Other</option>
               </select>
             </div>
+            <div style={{ marginTop: '10px' }}>
+              <label>Image:</label><br />
+              <input 
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                style={{ padding: '5px' }}
+              />
+              {imagePreview && (
+                <div style={{ marginTop: '10px' }}>
+                  <img src={imagePreview} alt="Preview" style={{ maxWidth: '200px', maxHeight: '200px', objectFit: 'cover', borderRadius: '6px' }} />
+                </div>
+              )}
+            </div>
             <button type="submit" style={{ marginTop: '15px', padding: '5px 15px' }}>Post Listing</button>
           </form>
         </div>
@@ -137,7 +185,7 @@ export default function ListingsPage() {
               <p>{listing.description}</p>
               <p><strong>Price:</strong> ${listing.price}</p>
               <p><strong>Category:</strong> {listing.category}</p>
-              <button onClick={() => handleDelete(listing.id)} style={{ padding: '5px 10px' }}>Delete</button>
+              <button onClick={() => handleDelete(listing.id)} style={{ padding: '5px 10px', cursor: 'pointer' }}>Delete</button>
             </div>
           ))
         )}
