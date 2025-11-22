@@ -1,62 +1,154 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const router = useRouter()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
 
   const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!email.endsWith('@scu.edu')) {
-      setError('Must use @scu.edu email')
-      return
+    e.preventDefault();
+    setError("");
+
+    if (!email.endsWith("@scu.edu")) {
+      setError("Must use @scu.edu email");
+      return;
     }
 
-    const users = JSON.parse(localStorage.getItem('users') || '{}')
-    
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+
     if (users[email] && users[email] === password) {
-      localStorage.setItem('currentUser', email)
-      router.push('/')
+      localStorage.setItem("currentUser", email);
+      router.push("/");
     } else {
-      setError('Invalid email or password')
+      setError("Invalid email or password");
     }
-  }
+  };
 
   return (
-    <div>
-      <h1>Login</h1>
-      <form onSubmit={handleLogin}>
-        <div>
-          <label>Email:</label><br />
-          <input 
-            type="email" 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{ width: '300px', padding: '5px' }}
-            required
-          />
-        </div>
-        <div style={{ marginTop: '10px' }}>
-          <label>Password:</label><br />
-          <input 
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ width: '300px', padding: '5px' }}
-            required
-          />
-        </div>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        <button type="submit" style={{ marginTop: '10px', padding: '5px 15px' }}>Login</button>
-      </form>
-      <p style={{ marginTop: '20px' }}>
-        Don't have an account? <a href="/signup">Sign up</a>
-      </p>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#f5f5f0",
+        padding: "20px",
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "white",
+          borderRadius: "12px",
+          padding: "40px",
+          maxWidth: "400px",
+          width: "100%",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        }}
+      >
+        <h1
+          style={{ fontSize: "28px", fontWeight: "bold", marginBottom: "8px" }}
+        >
+          Login
+        </h1>
+        <p style={{ color: "#666", marginBottom: "24px", fontSize: "14px" }}>
+          Sign in to your SCU Marketplace account
+        </p>
+
+        <form onSubmit={handleLogin}>
+          <div style={{ marginBottom: "16px" }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "6px",
+                fontSize: "14px",
+                fontWeight: "500",
+              }}
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="yourname@scu.edu"
+              style={{
+                width: "100%",
+                padding: "10px",
+                border: "1px solid #ddd",
+                borderRadius: "6px",
+                fontSize: "14px",
+              }}
+              required
+            />
+          </div>
+          <div style={{ marginBottom: "16px" }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "6px",
+                fontSize: "14px",
+                fontWeight: "500",
+              }}
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px",
+                border: "1px solid #ddd",
+                borderRadius: "6px",
+                fontSize: "14px",
+              }}
+              required
+            />
+          </div>
+          {error && (
+            <p style={{ color: "red", fontSize: "14px", marginBottom: "16px" }}>
+              {error}
+            </p>
+          )}
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              padding: "12px",
+              backgroundColor: "#800000",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              fontSize: "16px",
+              fontWeight: "500",
+              cursor: "pointer",
+            }}
+          >
+            Login
+          </button>
+        </form>
+        <p
+          style={{
+            marginTop: "20px",
+            textAlign: "center",
+            fontSize: "14px",
+            color: "#666",
+          }}
+        >
+          Don't have an account?{" "}
+          <a
+            href="/signup"
+            style={{ color: "#800000", textDecoration: "none" }}
+          >
+            Sign up
+          </a>
+        </p>
+      </div>
     </div>
-  )
+  );
 }
