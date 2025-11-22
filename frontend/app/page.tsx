@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 
 interface Listing {
   id: string
@@ -15,7 +14,6 @@ interface Listing {
 
 export default function HomePage() {
   const [listings, setListings] = useState<Listing[]>([])
-  const router = useRouter()
 
   useEffect(() => {
     const storedListings = localStorage.getItem('listings')
