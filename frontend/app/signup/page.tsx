@@ -2,24 +2,49 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { User } from "../types";
 
 export default function SignupPage() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [livesOnCampus, setLivesOnCampus] = useState(false);
+  const [address, setAddress] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
 
     if (!email.endsWith("@scu.edu")) {
       setError("Must use @scu.edu email");
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
+    if (
+      password.length < 6 ||
+      password.length > 16 ||
+      !/^[a-zA-Z0-9]+$/.test(password)
+    ) {
+      setError("Password must be 6-16 characters, letters and numbers only");
+      return;
+    }
 
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    if (!livesOnCampus && !address.trim()) {
+      setError("Please enter your off-campus address");
+      return;
+    }
+
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
     if (users[email]) {
       setError("Email already exists");
       return;
@@ -28,8 +53,19 @@ export default function SignupPage() {
     users[email] = password;
     localStorage.setItem("users", JSON.stringify(users));
 
+    const user: User = {
+      id: Date.now().toString(),
+      email,
+      firstName,
+      lastName,
+      phone,
+      address: livesOnCampus ? undefined : address,
+      livesOnCampus,
+      createdAt: new Date().toISOString(),
+    };
+
     const profiles = JSON.parse(localStorage.getItem("profiles") || "{}");
-    profiles[email] = { name, email };
+    profiles[email] = user;
     localStorage.setItem("profiles", JSON.stringify(profiles));
 
     localStorage.setItem("currentUser", email);
@@ -37,53 +73,282 @@ export default function SignupPage() {
   };
 
   return (
-    <div>
-      <h1>Sign Up</h1>
-      <form onSubmit={handleSignup}>
-        <div>
-          <label>Name:</label>
-          <br />
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            style={{ width: "300px", padding: "5px" }}
-            required
-          />
-        </div>
-        <div style={{ marginTop: "10px" }}>
-          <label>Email:</label>
-          <br />
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{ width: "300px", padding: "5px" }}
-            required
-          />
-        </div>
-        <div style={{ marginTop: "10px" }}>
-          <label>Password:</label>
-          <br />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ width: "300px", padding: "5px" }}
-            required
-          />
-        </div>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <button
-          type="submit"
-          style={{ marginTop: "10px", padding: "5px 15px" }}
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#f5f5f0",
+        padding: "20px",
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "white",
+          borderRadius: "12px",
+          padding: "40px",
+          maxWidth: "500px",
+          width: "100%",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        }}
+      >
+        <h1
+          style={{ fontSize: "28px", fontWeight: "bold", marginBottom: "8px" }}
         >
-          Sign Up
-        </button>
-      </form>
-      <p style={{ marginTop: "20px" }}>
-        Already have an account? <a href="/login">Login</a>
-      </p>
+          Create Account
+        </h1>
+        <p style={{ color: "#666", marginBottom: "24px", fontSize: "14px" }}>
+          Join the SCU Marketplace community
+        </p>
+
+        <form onSubmit={handleSignup}>
+          <div style={{ display: "flex", gap: "12px", marginBottom: "16px" }}>
+            <div style={{ flex: 1 }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "6px",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                }}
+              >
+                First Name
+              </label>
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border: "1px solid #ddd",
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                }}
+                required
+              />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "6px",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                }}
+              >
+                Last Name
+              </label>
+              <input
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border: "1px solid #ddd",
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                }}
+                required
+              />
+            </div>
+          </div>
+
+          <div style={{ marginBottom: "16px" }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "6px",
+                fontSize: "14px",
+                fontWeight: "500",
+              }}
+            >
+              SCU Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="yourname@scu.edu"
+              style={{
+                width: "100%",
+                padding: "10px",
+                border: "1px solid #ddd",
+                borderRadius: "6px",
+                fontSize: "14px",
+              }}
+              required
+            />
+          </div>
+
+          <div style={{ marginBottom: "16px" }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "6px",
+                fontSize: "14px",
+                fontWeight: "500",
+              }}
+            >
+              Phone Number
+            </label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="(555) 123-4567"
+              style={{
+                width: "100%",
+                padding: "10px",
+                border: "1px solid #ddd",
+                borderRadius: "6px",
+                fontSize: "14px",
+              }}
+              required
+            />
+          </div>
+
+          <div style={{ marginBottom: "16px" }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "6px",
+                fontSize: "14px",
+                fontWeight: "500",
+              }}
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="6-16 characters, letters and numbers"
+              style={{
+                width: "100%",
+                padding: "10px",
+                border: "1px solid #ddd",
+                borderRadius: "6px",
+                fontSize: "14px",
+              }}
+              required
+            />
+          </div>
+
+          <div style={{ marginBottom: "16px" }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "6px",
+                fontSize: "14px",
+                fontWeight: "500",
+              }}
+            >
+              Confirm Password
+            </label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px",
+                border: "1px solid #ddd",
+                borderRadius: "6px",
+                fontSize: "14px",
+              }}
+              required
+            />
+          </div>
+
+          <div style={{ marginBottom: "16px" }}>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                cursor: "pointer",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={livesOnCampus}
+                onChange={(e) => setLivesOnCampus(e.target.checked)}
+                style={{ width: "18px", height: "18px" }}
+              />
+              <span style={{ fontSize: "14px" }}>I live on campus</span>
+            </label>
+          </div>
+
+          {!livesOnCampus && (
+            <div style={{ marginBottom: "20px" }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "6px",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                }}
+              >
+                Off-Campus Address
+              </label>
+              <input
+                type="text"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="123 Main St, Santa Clara, CA"
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  border: "1px solid #ddd",
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                }}
+                required={!livesOnCampus}
+              />
+            </div>
+          )}
+
+          {error && (
+            <p style={{ color: "red", fontSize: "14px", marginBottom: "16px" }}>
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              padding: "12px",
+              backgroundColor: "#800000",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              fontSize: "16px",
+              fontWeight: "500",
+              cursor: "pointer",
+            }}
+          >
+            Create Account
+          </button>
+        </form>
+
+        <p
+          style={{
+            marginTop: "20px",
+            textAlign: "center",
+            fontSize: "14px",
+            color: "#666",
+          }}
+        >
+          Already have an account?{" "}
+          <a href="/login" style={{ color: "#800000", textDecoration: "none" }}>
+            Sign In
+          </a>
+        </p>
+      </div>
     </div>
   );
 }
