@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 import requests
 from django.http import JsonResponse
+from django.contrib.auth.models import User
 
 
 # User views
@@ -19,11 +20,14 @@ class CreateUserView(generics.CreateAPIView):
 # Listing views
 class ListingListCreate(generics.ListCreateAPIView):
     serializer_class = ListingSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get_queryset(self):
         user = self.request.user
+        if user.is_anonymous:
+            return Listing.objects.all()
         return Listing.objects.filter(author=user)
+        # return Listing.objects.filter(author=user)
             # queryset = super(ListingListCreate, self).get_queryset()
             # return queryset.filter(author=self.request.user)
 
