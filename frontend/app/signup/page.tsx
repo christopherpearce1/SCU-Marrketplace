@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "../types";
+import { authAPI } from "../../api";
 
 export default function SignupPage() {
   const [firstName, setFirstName] = useState("");
@@ -16,7 +17,7 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -53,23 +54,19 @@ export default function SignupPage() {
     users[email] = password;
     localStorage.setItem("users", JSON.stringify(users));
 
-    const user: User = {
-      id: Date.now().toString(),
-      email,
-      firstName,
-      lastName,
-      phone,
-      address: livesOnCampus ? undefined : address,
-      livesOnCampus,
-      createdAt: new Date().toISOString(),
-    };
-
-    const profiles = JSON.parse(localStorage.getItem("profiles") || "{}");
-    profiles[email] = user;
-    localStorage.setItem("profiles", JSON.stringify(profiles));
-
-    localStorage.setItem("currentUser", email);
-    router.push("/");
+    try {
+      // Extract username from email (or use email as username)
+      const username = email.split('@')[0]; // or just use email
+      
+      await authAPI.register(username, password);
+      
+      // Auto-login after signup
+      const loginData = await authAPI.login(username, password);
+      localStorage.setItem("currentUser", loginData.username);
+      router.push("/");
+    } catch (err: any) {
+      setError(err.message || "Signup failed");
+    }
   };
 
   return (

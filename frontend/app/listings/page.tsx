@@ -1,15 +1,18 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { listingsAPI, authAPI } from '../../api'
 
 interface Listing {
-  id: string
+  id: number
   title: string
   description: string
-  price: number
-  category: string
-  seller: string
-  createdAt: string
+  price: string
+  created_at: string
+  sold: boolean
+  author: string
+  //category: string
+
 }
 
 export default function ListingsPage() {
@@ -18,52 +21,68 @@ export default function ListingsPage() {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
-  const [category, setCategory] = useState('Textbooks')
   const [currentUser, setCurrentUser] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const user = localStorage.getItem('currentUser')
-    setCurrentUser(user)
-    loadListings(user)
+    checkAuth()
   }, [])
 
-  const loadListings = (user: string | null) => {
-    if (!user) return
-    const allListings = JSON.parse(localStorage.getItem('listings') || '[]')
-    const userListings = allListings.filter((l: Listing) => l.seller === user)
-    setListings(userListings)
+  const checkAuth = async () => {
+    try {
+      const user = await authAPI.getCurrentUser()
+      setCurrentUser(user.username)
+      loadListings()
+    } catch (err) {
+      // Not logged in
+      setCurrentUser(null)
+      setLoading(false)
+    }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const loadListings = async () => {
+    try {
+      const allListings = await listingsAPI.getAll()
+      // Filter to only show current user's listings
+      const userListings = allListings.filter((l: Listing) => 
+        localStorage.getItem('currentUser') === String(l.author)
+      )
+      setListings(userListings)
+    } catch (err) {
+      console.error('Failed to load listings:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    const newListing: Listing = {
-      id: Date.now().toString(),
-      title,
-      description,
-      price: parseFloat(price),
-      category,
-      seller: currentUser!,
-      createdAt: new Date().toISOString()
+    try {
+      await listingsAPI.create(title, description, parseFloat(price))
+      await loadListings() // Reload listings
+      setTitle('')
+      setDescription('')
+      setPrice('')
+      setShowForm(false)
+    } catch (err: any) {
+      alert(err.message || 'Failed to create listing')
     }
-
-    const allListings = JSON.parse(localStorage.getItem('listings') || '[]')
-    allListings.push(newListing)
-    localStorage.setItem('listings', JSON.stringify(allListings))
-    
-    setListings([...listings, newListing])
-    setTitle('')
-    setDescription('')
-    setPrice('')
-    setCategory('Textbooks')
-    setShowForm(false)
   }
 
-  const handleDelete = (id: string) => {
-    const allListings = JSON.parse(localStorage.getItem('listings') || '[]')
-    const updated = allListings.filter((l: Listing) => l.id !== id)
-    localStorage.setItem('listings', JSON.stringify(updated))
-    setListings(listings.filter(l => l.id !== id))
+  const handleDelete = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this listing?')) return
+    
+    try {
+      await listingsAPI.delete(id)
+      await loadListings() // Reload listings
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete listing')
+    }
+  }
+
+  if (!currentUser) {
+    return <div>Please log in to view your listings.</div>
   }
 
   return (
@@ -108,7 +127,7 @@ export default function ListingsPage() {
                 required
               />
             </div>
-            <div style={{ marginTop: '10px' }}>
+            {/* <div style={{ marginTop: '10px' }}>
               <label>Category:</label><br />
               <select 
                 value={category}
@@ -121,14 +140,16 @@ export default function ListingsPage() {
                 <option>Clothing</option>
                 <option>Other</option>
               </select>
-            </div>
+            </div> */}
             <button type="submit" style={{ marginTop: '15px', padding: '5px 15px' }}>Post Listing</button>
           </form>
         </div>
       )}
 
       <div>
-        {listings.length === 0 ? (
+        {loading ? (
+          <p>Loading your listings...</p>
+        ) : listings.length === 0 ? (
           <p>You have no listings yet.</p>
         ) : (
           listings.map(listing => (
@@ -136,7 +157,8 @@ export default function ListingsPage() {
               <h3>{listing.title}</h3>
               <p>{listing.description}</p>
               <p><strong>Price:</strong> ${listing.price}</p>
-              <p><strong>Category:</strong> {listing.category}</p>
+              <p><strong>Created:</strong> {new Date(listing.created_at).toLocaleDateString()}</p>
+              {listing.sold && <p><strong>SOLD</strong></p>}
               <button onClick={() => handleDelete(listing.id)} style={{ padding: '5px 10px' }}>Delete</button>
             </div>
           ))

@@ -2,29 +2,24 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { authAPI } from "../../api";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState(""); // Changed from email
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (!email.endsWith("@scu.edu")) {
-      setError("Must use @scu.edu email");
-      return;
-    }
-
-    const users = JSON.parse(localStorage.getItem("users") || "{}");
-
-    if (users[email] && users[email] === password) {
-      localStorage.setItem("currentUser", email);
+    try {
+      const data = await authAPI.login(username, password);
+      localStorage.setItem("currentUser", data.username);
       router.push("/");
-    } else {
-      setError("Invalid email or password");
+    } catch (err: any) {
+      setError(err.message || "Login failed");
     }
   };
 
@@ -71,9 +66,9 @@ export default function LoginPage() {
               Email
             </label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               placeholder="yourname@scu.edu"
               style={{
                 width: "100%",
