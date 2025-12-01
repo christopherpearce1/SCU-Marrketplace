@@ -29,3 +29,6 @@ Thumbs.db
 npm-debug.log*
 pnpm-debug.log*
 
+
+# backend 
+backend/db.sqlite3
