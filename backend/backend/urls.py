@@ -16,12 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from api.views import CreateUserView
+from api.views import CreateUserView, LoginView, LogoutView, CurrentUserView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/user/register/', CreateUserView.as_view(), name = "user-register"),
-    path("api-auth/", include("rest_framework.urls")),
+    # Auth endpoints
+    path('api/user/register/', CreateUserView.as_view(), name="user-register"),
+    path('api/user/login/', LoginView.as_view(), name="user-login"),
+    path('api/user/logout/', LogoutView.as_view(), name="user-logout"),
+    path('api/user/me/', CurrentUserView.as_view(), name="user-me"),
+    # Listings endpoints
     path("api/", include("api.urls")),
-
 ]
