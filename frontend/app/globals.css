@@ -1,5 +1,76 @@
+:root {
+  --scu-maroon: #800000;
+  --scu-maroon-light: #a00000;
+  --scu-maroon-dark: #600000;
+  --scu-maroon-hover: #a00000;
+  --gray-light: #f0f0f0;
+  --gray-medium: #666;
+  --danger-red: #dc2626;
+  --danger-red-hover: #b91c1c;
+}
+
 body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
+}
+
+/* Global Button Styles */
+button {
+  font-family: Arial, sans-serif;
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 20px;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Primary Button (SCU Maroon) */
+.btn-primary {
+  background-color: var(--scu-maroon);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--scu-maroon-hover);
+}
+
+/* Secondary Button (Gray) */
+.btn-secondary {
+  background-color: var(--gray-light);
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background-color: #e5e5e5;
+}
+
+/* Danger Button (Red) */
+.btn-danger {
+  background-color: var(--danger-red);
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: var(--danger-red-hover);
+}
+
+/* Input Styles */
+input, textarea, select {
+  font-family: Arial, sans-serif;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--scu-maroon);
 }

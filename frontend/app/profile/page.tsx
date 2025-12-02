@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { User } from "../types";
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [profile, setProfile] = useState<User | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [firstName, setFirstName] = useState("");
@@ -42,6 +44,15 @@ export default function ProfilePage() {
     localStorage.setItem("profiles", JSON.stringify(profiles));
     setProfile(updatedProfile);
     setIsEditing(false);
+  };
+
+  const handleLogout = () => {
+    // TODO: Connect to backend API
+    // await authAPI.logout();
+    // localStorage.removeItem("currentUser");
+    // router.push("/login");
+    
+    console.log("Logout button clicked - ready for backend integration");
   };
 
   if (!profile) {
@@ -173,18 +184,7 @@ export default function ProfilePage() {
 
         {isEditing ? (
           <div style={{ display: "flex", gap: "12px", marginTop: "20px" }}>
-            <button
-              onClick={handleSave}
-              style={{
-                padding: "10px 20px",
-                backgroundColor: "#800000",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "14px",
-              }}
-            >
+            <button onClick={handleSave} className="btn-primary">
               Save
             </button>
             <button
@@ -195,35 +195,20 @@ export default function ProfilePage() {
                 setPhone(profile.phone || "");
                 setAddress(profile.address || "");
               }}
-              style={{
-                padding: "10px 20px",
-                backgroundColor: "#f0f0f0",
-                color: "#333",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "14px",
-              }}
+              className="btn-secondary"
             >
               Cancel
             </button>
           </div>
         ) : (
-          <button
-            onClick={() => setIsEditing(true)}
-            style={{
-              marginTop: "20px",
-              padding: "10px 20px",
-              backgroundColor: "#f0f0f0",
-              color: "#333",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "14px",
-            }}
-          >
-            Edit Profile
-          </button>
+          <div style={{ display: "flex", gap: "12px", marginTop: "20px" }}>
+            <button onClick={() => setIsEditing(true)} className="btn-secondary">
+              Edit Profile
+            </button>
+            <button onClick={handleLogout} className="btn-secondary">
+              Logout
+            </button>
+          </div>
         )}
       </div>
     </div>

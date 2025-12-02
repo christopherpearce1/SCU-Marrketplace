@@ -319,16 +319,11 @@ export default function SignupPage() {
 
           <button
             type="submit"
+            className="btn-primary"
             style={{
               width: "100%",
               padding: "12px",
-              backgroundColor: "#800000",
-              color: "white",
-              border: "none",
-              borderRadius: "6px",
               fontSize: "16px",
-              fontWeight: "500",
-              cursor: "pointer",
             }}
           >
             Create Account
