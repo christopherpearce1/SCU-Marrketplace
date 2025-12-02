@@ -24,7 +24,7 @@ export function AppSidebar() {
     }}>
       <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div style={{ padding: '24px', borderBottom: '1px solid #e5e7eb' }}>
-          <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', margin: 0 }}>SCU Marketplace</h1>
+          <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#800000', margin: 0 }}>SCU Marketplace</h1>
         </div>
         <nav style={{ flex: 1, padding: '16px' }}>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -43,12 +43,13 @@ export function AppSidebar() {
                       borderRadius: '8px',
                       textDecoration: 'none',
                       color: isActive ? '#ffffff' : '#374151',
-                      backgroundColor: isActive ? '#3b82f6' : 'transparent',
+                      backgroundColor: isActive ? '#800000' : 'transparent',
                       transition: 'background-color 0.2s',
+                      fontWeight: isActive ? '600' : '500',
                     }}
                     onMouseEnter={(e) => {
                       if (!isActive) {
-                        e.currentTarget.style.backgroundColor = '#f3f4f6'
+                        e.currentTarget.style.backgroundColor = '#ffe6e6'
                       }
                     }}
                     onMouseLeave={(e) => {
