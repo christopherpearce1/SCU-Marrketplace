@@ -58,7 +58,7 @@ export default function SignupPage() {
       // Extract username from email (or use email as username)
       const username = email.split('@')[0]; // or just use email
       
-      await authAPI.register(username, password);
+      await authAPI.register(username, password, email, firstName, lastName, phone);
       
       // Auto-login after signup
       const loginData = await authAPI.login(username, password);
