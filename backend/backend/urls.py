@@ -15,8 +15,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
-from api.views import CreateUserView, LoginView, LogoutView, CurrentUserView
+from django.urls import path
+from api.views import (
+    CreateUserView, LoginView, LogoutView, CurrentUserView,
+    ListingListCreate, ListingDetailView, ListingDelete
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,5 +29,7 @@ urlpatterns = [
     path('api/user/logout/', LogoutView.as_view(), name="user-logout"),
     path('api/user/me/', CurrentUserView.as_view(), name="user-me"),
     # Listings endpoints
-    path("api/", include("api.urls")),
+    path('api/listings/', ListingListCreate.as_view(), name="listing-list-create"),
+    path('api/listings/<int:pk>/', ListingDetailView.as_view(), name="listing-detail"),
+    path('api/listings/<int:pk>/delete/', ListingDelete.as_view(), name="listing-delete"),
 ]
