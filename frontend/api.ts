@@ -24,17 +24,17 @@ async function apiCall(endpoint: string, options: RequestInit = {}) {
 
 // user api (auth)
 export const authAPI = {
-  register: async (username: string, password: string, email: string, first_name: string, last_name: string, phone: string) => {
+  register: async (username: string, password: string, first_name: string, last_name: string, phone: string) => {
     return apiCall('/user/register/', {
       method: 'POST',
-      body: JSON.stringify({ username, password, email, first_name, last_name, phone }),
+      body: JSON.stringify({ username, password, first_name, last_name, phone }),
     });
   },
 
-  login: async (email: string, password: string) => {
+  login: async (username: string, password: string) => {
     return apiCall('/user/login/', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ username, password }),
     });
   },
 
