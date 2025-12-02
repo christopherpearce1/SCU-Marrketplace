@@ -38,9 +38,16 @@ class LogoutView(APIView):
 class CurrentUserView(APIView):
     def get(self, request):
         if request.user.is_authenticated:
+            phone = ''
+            if hasattr(request.user, 'profile'):
+                phone = request.user.profile.phone
             return Response({
                 'id': request.user.id,
                 'username': request.user.username,
+                'email': request.user.email,
+                'first_name': request.user.first_name,
+                'last_name': request.user.last_name,
+                'phone': phone,
             })
         return Response({'error': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
 
