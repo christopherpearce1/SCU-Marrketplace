@@ -24,17 +24,17 @@ async function apiCall(endpoint: string, options: RequestInit = {}) {
 
 // user api (auth)
 export const authAPI = {
-  register: async (username: string, password: string) => {
+  register: async (username: string, password: string, email: string, first_name: string, last_name: string, phone: string) => {
     return apiCall('/user/register/', {
       method: 'POST',
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username, password, email, first_name, last_name, phone }),
     });
   },
 
-  login: async (username: string, password: string) => {
+  login: async (email: string, password: string) => {
     return apiCall('/user/login/', {
       method: 'POST',
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ email, password }),
     });
   },
 
@@ -60,10 +60,10 @@ export const listingsAPI = {
     return apiCall(`/listings/${id}/`);
   },
 
-  create: async (title: string, description: string, price: number) => {
+  create: async (title: string, description: string, price: number, category?: string) => {
     return apiCall('/listings/', {
       method: 'POST',
-      body: JSON.stringify({ title, description, price }),
+      body: JSON.stringify({ title, description, price, category }),
     });
   },
 
