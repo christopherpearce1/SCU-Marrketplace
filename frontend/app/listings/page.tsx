@@ -92,9 +92,11 @@ export default function ListingsPage() {
   const handleDelete = async (id: number) => {
     try {
       await listingsAPI.delete(id)
-      setListings(listings.filter(l => l.id !== id))
+      // Use functional setState to avoid stale closure (pass function instead of value to avoid stale closure)
+      setListings(prevListings => prevListings.filter(l => l.id !== id))
     } catch (err: any) {
-      setListings(listings.filter(l => l.id !== id))
+      // handle error by removing from UI
+      setListings(prevListings => prevListings.filter(l => l.id !== id))
     }
   }
 
