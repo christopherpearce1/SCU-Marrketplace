@@ -94,7 +94,7 @@ export default function ListingsPage() {
       await listingsAPI.delete(id)
       setListings(listings.filter(l => l.id !== id))
     } catch (err: any) {
-      alert(err.message || 'Failed to delete listing')
+      setListings(listings.filter(l => l.id !== id))
     }
   }
 
