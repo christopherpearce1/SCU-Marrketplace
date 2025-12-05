@@ -246,17 +246,33 @@ export default function ProfilePage() {
                 padding: "16px",
                 marginBottom: "12px",
                 backgroundColor: "white",
+                display: "flex",
+                gap: "16px",
               }}
             >
-              <h3 style={{ margin: "0 0 8px 0", fontSize: "18px" }}>
-                {listing.title}
-              </h3>
-              <p style={{ margin: "0 0 8px 0", color: "#666" }}>
-                {listing.description}
-              </p>
-              <p style={{ margin: 0, fontWeight: "bold" }}>
-                ${listing.price}
-              </p>
+              {listing.image && (
+                <img
+                  src={listing.image}
+                  alt={listing.title}
+                  style={{
+                    width: "120px",
+                    height: "120px",
+                    objectFit: "cover",
+                    borderRadius: "6px",
+                  }}
+                />
+              )}
+              <div style={{ flex: 1 }}>
+                <h3 style={{ margin: "0 0 8px 0", fontSize: "18px" }}>
+                  {listing.title}
+                </h3>
+                <p style={{ margin: "0 0 8px 0", color: "#666" }}>
+                  {listing.description}
+                </p>
+                <p style={{ margin: 0, fontWeight: "bold" }}>
+                  ${listing.price}
+                </p>
+              </div>
             </div>
           ))
         )}

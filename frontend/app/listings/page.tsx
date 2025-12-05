@@ -11,6 +11,7 @@ interface Listing {
   price: number
   category?: string
   author: { username: string }
+  image?: string
 }
 
 export default function ListingsPage() {
@@ -219,13 +220,18 @@ export default function ListingsPage() {
           <p>You have no listings yet.</p>
         ) : (
           listings.map(listing => (
-            <div key={listing.id} style={{ border: '1px solid gray', padding: '10px', marginBottom: '10px' }}>
-              <h3>{listing.title}</h3>
-              <p>{listing.description}</p>
-              <p><strong>Price:</strong> ${listing.price}</p>
-              <p><strong>Category:</strong> {listing.category}</p>
-              <button onClick={() => handleEdit(listing)} style={{ padding: '5px 10px', cursor: 'pointer', marginRight: '10px' }}>Edit</button>
-              <button onClick={() => handleDelete(listing.id)} style={{ padding: '5px 10px', cursor: 'pointer' }}>Delete</button>
+            <div key={listing.id} style={{ border: '1px solid gray', padding: '15px', marginBottom: '15px', borderRadius: '8px', display: 'flex', gap: '15px' }}>
+              {listing.image && (
+                <img src={listing.image} alt={listing.title} style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '6px' }} />
+              )}
+              <div style={{ flex: 1 }}>
+                <h3 style={{ margin: '0 0 8px 0' }}>{listing.title}</h3>
+                <p style={{ margin: '0 0 8px 0' }}>{listing.description}</p>
+                <p style={{ margin: '0 0 8px 0' }}><strong>Price:</strong> ${listing.price}</p>
+                <p style={{ margin: '0 0 12px 0' }}><strong>Category:</strong> {listing.category}</p>
+                <button onClick={() => handleEdit(listing)} style={{ padding: '5px 10px', cursor: 'pointer', marginRight: '10px' }}>Edit</button>
+                <button onClick={() => handleDelete(listing.id)} style={{ padding: '5px 10px', cursor: 'pointer' }}>Delete</button>
+              </div>
             </div>
           ))
         )}
