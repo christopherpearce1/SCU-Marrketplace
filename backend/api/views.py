@@ -82,6 +82,13 @@ class ListingDetailView(generics.RetrieveAPIView):
     permission_classes = [AllowAny]  #qnyone can view
     queryset = Listing.objects.all()
 
+class ListingUpdate(generics.UpdateAPIView):
+    serializer_class = ListingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self): # can only update own listing
+        return Listing.objects.filter(author=self.request.user)
+
 class ListingDelete(generics.DestroyAPIView):
     serializer_class = ListingSerializer
     permission_classes = [IsAuthenticated]

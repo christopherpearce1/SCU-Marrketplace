@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from api.views import (
     CreateUserView, LoginView, LogoutView, CurrentUserView,
-    ListingListCreate, ListingDetailView, ListingDelete
+    ListingListCreate, ListingDetailView, ListingUpdate, ListingDelete
 )
 
 urlpatterns = [
@@ -31,5 +31,6 @@ urlpatterns = [
     # Listings endpoints
     path('api/listings/', ListingListCreate.as_view(), name="listing-list-create"),
     path('api/listings/<int:pk>/', ListingDetailView.as_view(), name="listing-detail"),
+    path('api/listings/<int:pk>/update/', ListingUpdate.as_view(), name="listing-update"),
     path('api/listings/<int:pk>/delete/', ListingDelete.as_view(), name="listing-delete"),
 ]

@@ -81,6 +81,13 @@ export const listingsAPI = {
     });
   },
 
+  update: async (id: number, title?: string, description?: string, price?: number, category?: string, image?: string) => {
+    return apiCall(`/listings/${id}/update/`, {
+      method: 'PUT',
+      body: JSON.stringify({ title, description, price, category, image}),
+    });
+  },
+
   delete: async (id: number) => {
     return apiCall(`/listings/${id}/delete/`, {
       method: 'DELETE',
