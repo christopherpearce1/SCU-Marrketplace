@@ -18,6 +18,7 @@ export default function HomePage() {
   const router = useRouter()
   const [listings, setListings] = useState<Listing[]>([])
   const [search, setSearch] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState('All')
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -44,11 +45,15 @@ export default function HomePage() {
     }
   }
 
-  const filtered = listings.filter(l => 
-    l.title.toLowerCase().includes(search.toLowerCase()) ||
-    l.description.toLowerCase().includes(search.toLowerCase()) ||
-    `${l.author.first_name} ${l.author.last_name}`.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = listings.filter(l => {
+    const matchesSearch = l.title.toLowerCase().includes(search.toLowerCase()) ||
+      l.description.toLowerCase().includes(search.toLowerCase()) ||
+      `${l.author.first_name} ${l.author.last_name}`.toLowerCase().includes(search.toLowerCase())
+    
+    const matchesCategory = categoryFilter === 'All' || l.category === categoryFilter
+    
+    return matchesSearch && matchesCategory
+  })
 
   if (loading) return <div>Loading...</div>
 
@@ -56,20 +61,39 @@ export default function HomePage() {
     <div>
       <h1>All Listings</h1>
       
-      <input
-        type="text"
-        placeholder="Search listings..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        style={{
-          width: '100%',
-          maxWidth: '400px',
-          padding: '10px',
-          marginBottom: '20px',
-          border: '1px solid #ddd',
-          borderRadius: '6px'
-        }}
-      />
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
+        <input
+          type="text"
+          placeholder="Search listings..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{
+            flex: '1',
+            minWidth: '250px',
+            padding: '10px',
+            border: '1px solid #ddd',
+            borderRadius: '6px'
+          }}
+        />
+        
+        <select
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+          style={{
+            padding: '10px',
+            border: '1px solid #ddd',
+            borderRadius: '6px',
+            cursor: 'pointer'
+          }}
+        >
+          <option value="All">All Categories</option>
+          <option value="Textbooks">Textbooks</option>
+          <option value="Electronics">Electronics</option>
+          <option value="Furniture">Furniture</option>
+          <option value="Clothing">Clothing</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
 
       <div>
         {filtered.length === 0 ? (

@@ -17,6 +17,7 @@ export default function ListingsPage() {
   const router = useRouter()
   const [listings, setListings] = useState<Listing[]>([])
   const [showForm, setShowForm] = useState(false)
+  const [editingId, setEditingId] = useState<number | null>(null)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [price, setPrice] = useState('')
@@ -75,7 +76,14 @@ export default function ListingsPage() {
     e.preventDefault()
     
     try {
-      await listingsAPI.create(title, description, parseFloat(price), category, imagePreview || undefined)
+      if (editingId) {
+        // Update existing listing
+        await listingsAPI.update(editingId, title, description, parseFloat(price), category, imagePreview || undefined)
+      } else {
+        // Create new listing
+        await listingsAPI.create(title, description, parseFloat(price), category, imagePreview || undefined)
+      }
+      
       setTitle('')
       setDescription('')
       setPrice('')
@@ -83,10 +91,32 @@ export default function ListingsPage() {
       setImage(null)
       setImagePreview(null)
       setShowForm(false)
+      setEditingId(null)
       if (currentUser) await loadListings(currentUser)
     } catch (err: any) {
-      alert(err.message || 'Failed to create listing')
+      alert(err.message || 'Failed to save listing')
     }
+  }
+
+  const handleEdit = (listing: Listing) => {
+    setEditingId(listing.id)
+    setTitle(listing.title)
+    setDescription(listing.description)
+    setPrice(listing.price.toString())
+    setCategory(listing.category || 'Textbooks')
+    setImagePreview(null)
+    setShowForm(true)
+  }
+
+  const handleCancelEdit = () => {
+    setEditingId(null)
+    setTitle('')
+    setDescription('')
+    setPrice('')
+    setCategory('Textbooks')
+    setImage(null)
+    setImagePreview(null)
+    setShowForm(false)
   }
 
   const handleDelete = async (id: number) => {
@@ -112,7 +142,7 @@ export default function ListingsPage() {
 
       {showForm && (
         <div style={{ border: '1px solid black', padding: '15px', marginBottom: '20px' }}>
-          <h2>Create Listing</h2>
+          <h2>{editingId ? 'Edit Listing' : 'Create Listing'}</h2>
           <form onSubmit={handleSubmit}>
             <div>
               <label>Title:</label><br />
@@ -172,7 +202,14 @@ export default function ListingsPage() {
                 </div>
               )}
             </div>
-            <button type="submit" style={{ marginTop: '15px', padding: '5px 15px' }}>Post Listing</button>
+            <button type="submit" style={{ marginTop: '15px', padding: '5px 15px' }}>
+              {editingId ? 'Update Listing' : 'Post Listing'}
+            </button>
+            {editingId && (
+              <button type="button" onClick={handleCancelEdit} style={{ marginTop: '15px', marginLeft: '10px', padding: '5px 15px' }}>
+                Cancel
+              </button>
+            )}
           </form>
         </div>
       )}
@@ -187,6 +224,7 @@ export default function ListingsPage() {
               <p>{listing.description}</p>
               <p><strong>Price:</strong> ${listing.price}</p>
               <p><strong>Category:</strong> {listing.category}</p>
+              <button onClick={() => handleEdit(listing)} style={{ padding: '5px 10px', cursor: 'pointer', marginRight: '10px' }}>Edit</button>
               <button onClick={() => handleDelete(listing.id)} style={{ padding: '5px 10px', cursor: 'pointer' }}>Delete</button>
             </div>
           ))
